@@ -1,0 +1,162 @@
+from pathlib import Path
+html = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUDIH — Packaging Slip Generator</title>
+<style>
+:root{--ink:#202124;--muted:#6b7280;--line:#e5e7eb;--soft:#f7f7f7;--accent:#202124}
+*{box-sizing:border-box}body{margin:0;background:#f2f3f5;color:var(--ink);font:15px/1.45 Arial,Helvetica,sans-serif}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:25px;font-weight:800;letter-spacing:2px}.top small{color:var(--muted)}
+.wrap{max-width:1240px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns:minmax(320px,440px) minmax(0,1fr);gap:22px;align-items:start}
+.panel,.preview-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 16px #1111}
+.panel{padding:20px}.panel h2{font-size:17px;margin:0 0 16px}.section{font-size:11px;font-weight:800;letter-spacing:1.2px;color:#777;margin:20px 0 10px;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin-bottom:11px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:#4b5563}
+input,textarea{width:100%;border:1px solid #d8dce2;border-radius:8px;padding:10px 11px;font:14px Arial;background:#fff;color:#202124;outline:none}
+input:focus,textarea:focus{border-color:#555;box-shadow:0 0 0 3px #1111}textarea{resize:vertical;min-height:72px}
+input[type=file]{padding:8px;font-size:12px}.hint{font-size:11px;color:#858585;margin-top:5px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+button{border:0;border-radius:8px;padding:11px 15px;font-weight:700;cursor:pointer;font-size:13px}
+.primary{background:#202124;color:#fff}.secondary{background:#eceef1;color:#222}.danger{background:#fff0f0;color:#a33}
+.preview-wrap{padding:18px;position:sticky;top:14px}.preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.preview-head strong{font-size:14px}.preview-head span{font-size:11px;color:#777}
+.paper{background:#fff;width:100%;max-width:800px;min-height:900px;margin:auto;padding:42px 48px;border:1px solid #e6e6e6;color:#222}
+.paper-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #222;padding-bottom:15px}
+.paper-brand{font-size:31px;font-weight:800;letter-spacing:2px}.slip-title{text-align:right;font-size:16px;font-weight:800}.slip-title small{display:block;font-size:11px;color:#666;font-weight:400;margin-top:4px}
+.meta{display:grid;grid-template-columns:1fr 1fr 1fr;background:#f3f3f3;border:1px solid #ddd;margin-top:22px}
+.meta>div{padding:12px;border-right:1px solid #ddd;font-size:12px}.meta>div:last-child{border:0}.meta b,.addr b,.items-title{display:block;font-size:10px;letter-spacing:.7px;margin-bottom:6px}
+.meta strong{font-size:16px}.addresses{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}
+.addr{font-size:12px;line-height:1.6;white-space:pre-line}.addr b{font-size:11px;margin-bottom:8px}
+.items-title{margin:0 0 9px}.item{display:grid;grid-template-columns:92px 1fr 48px 90px;gap:12px;align-items:center;border:1px solid #ddd;padding:10px;font-size:12px}
+.item img{width:82px;height:82px;object-fit:cover;border:1px solid #eee;border-radius:5px}.item-name{font-weight:700;font-size:13px;margin-bottom:5px}.sub{color:#666;line-height:1.5}.total{display:flex;justify-content:space-between;border-top:1px solid #333;margin-top:16px;padding-top:13px;font-size:13px;font-weight:700}
+.thanks{text-align:center;margin-top:56px;padding-top:18px;border-top:1px solid #bbb;font-size:14px;font-weight:700}.footer{text-align:center;color:#666;font-size:10px;line-height:1.6;margin-top:13px}
+@media(max-width:850px){.wrap{grid-template-columns:1fr}.preview-wrap{position:static}.paper{padding:25px 20px;min-height:auto}.top{padding:15px}.meta>div{padding:8px;font-size:10px}.item{grid-template-columns:65px 1fr 35px 70px;gap:7px;padding:7px}.item img{width:60px;height:60px}}
+@media print{body{background:#fff}.top,.panel,.preview-head{display:none!important}.wrap{display:block;margin:0;padding:0}.preview-wrap{border:0;box-shadow:none;padding:0;position:static}.paper{max-width:none;width:100%;min-height:0;border:0;padding:12mm 14mm;margin:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">MUDIH</div><small>Packaging Slip Generator · Create & print order slips</small></header>
+<main class="wrap">
+<section class="panel">
+<h2>Enter order details</h2>
+<div class="section">Order details</div>
+<div class="grid2">
+ <div class="field"><label>Order ID</label><input id="orderId" value="#8081430"></div>
+ <div class="field"><label>Order date</label><input id="orderDate" type="date" value="2026-11-05"></div>
+</div>
+<div class="grid2">
+ <div class="field"><label>Payment method</label><input id="payment" value="Cash on Delivery (COD)"></div>
+ <div class="field"><label>Collectable amount (₹)</label><input id="cod" type="number" min="0" step="0.01" value="1199"></div>
+</div>
+<div class="section">Customer addresses</div>
+<div class="field"><label>Ship to</label><textarea id="ship">Madhava Krishna Heights
+Vivek Nagar, Kukatpally
+Flat No. 403
+Hyderabad, Telangana – 500072
+India</textarea></div>
+<div class="field"><label>Bill to</label><textarea id="bill">Madhava Krishna Heights
+Vivek Nagar, Kukatpally
+Flat No. 403
+Hyderabad, Telangana – 500072
+India</textarea></div>
+<div class="section">Product details</div>
+<div class="field"><label>Product photo</label><input id="photo" type="file" accept="image/*"><div class="hint">Choose a product image from your phone or computer.</div></div>
+<div class="field"><label>Product name</label><input id="product" value="Mudih Light Beige Korean Bootcut Pants for Men"></div>
+<div class="field"><label>Product description</label><input id="description" value="Premium Japanese Fabric"></div>
+<div class="grid2">
+ <div class="field"><label>Size</label><input id="size" value="30"></div>
+ <div class="field"><label>Colour</label><input id="color" value="Light Beige"></div>
+</div>
+<div class="grid2">
+ <div class="field"><label>Material</label><input id="material" value="Polyester"></div>
+ <div class="field"><label>Quantity</label><input id="qty" type="number" min="1" value="1"></div>
+</div>
+<div class="field"><label>Item price (₹)</label><input id="price" type="number" min="0" step="0.01" value="1199"></div>
+<div class="section">Store details (editable)</div>
+<div class="field"><label>Address / footer</label><textarea id="store">28, Civil Lines, Near Axis Bank, Boat Club Road
+Roorkee, Uttarakhand, India
+PIN: 247667</textarea></div>
+<div class="grid2">
+ <div class="field"><label>Mobile numbers</label><input id="phone" value="9808808637, 8267007838"></div>
+ <div class="field"><label>Email</label><input id="email" value="mudihfashion@gmail.com"></div>
+</div>
+<div class="field"><label>Website</label><input id="website" value="www.mudih.in"></div>
+<div class="actions">
+ <button class="primary" id="printBtn">Generate / Print PDF</button>
+ <button class="secondary" id="resetBtn">Reset sample</button>
+</div>
+<div class="hint">Tip: Tap “Generate / Print PDF”, then choose “Save as PDF” in the print window.</div>
+</section>
+<section class="preview-wrap">
+<div class="preview-head"><strong>Live packaging slip preview</strong><span>A4 · Print-ready</span></div>
+<div class="paper" id="paper">
+ <div class="paper-head"><div class="paper-brand">MUDIH</div><div class="slip-title">PACKING SLIP<small>Order <span data-bind="orderId">#8081430</span></small></div></div>
+ <div class="meta">
+  <div><b>ORDER DATE</b><span id="pDate">5 November 2026</span></div>
+  <div><b>PAYMENT METHOD</b><span id="pPayment">Cash on Delivery (COD)</span></div>
+  <div><b>COLLECTABLE AMOUNT</b><strong id="pCod">₹1,199.00</strong></div>
+ </div>
+ <div class="addresses">
+  <div class="addr"><b>SHIP TO</b><span id="pShip">Madhava Krishna Heights
+Vivek Nagar, Kukatpally
+Flat No. 403
+Hyderabad, Telangana – 500072
+India</span></div>
+  <div class="addr"><b>BILL TO</b><span id="pBill">Madhava Krishna Heights
+Vivek Nagar, Kukatpally
+Flat No. 403
+Hyderabad, Telangana – 500072
+India</span></div>
+ </div>
+ <div class="items-title">ITEMS</div>
+ <div class="item">
+  <img id="pPhoto" alt="Product image">
+  <div><div class="item-name" id="pProduct">Mudih Light Beige Korean Bootcut Pants for Men</div><div class="sub"><span id="pDesc">Premium Japanese Fabric</span><br>Size: <span id="pSize">30</span> &nbsp;|&nbsp; Colour: <span id="pColor">Light Beige</span><br>Material: <span id="pMaterial">Polyester</span></div></div>
+  <div><b>Qty</b><br><span id="pQty">1</span></div>
+  <div><b>Price</b><br><span id="pPrice">₹1,199.00</span></div>
+ </div>
+ <div class="total"><span>COD AMOUNT TO COLLECT</span><span id="pTotal">₹1,199.00</span></div>
+ <div class="thanks">Thank you for shopping with us!</div>
+ <div class="footer"><b>MUDIH</b><br><span id="pStore">28, Civil Lines, Near Axis Bank, Boat Club Road
+Roorkee, Uttarakhand, India
+PIN: 247667</span><br>Mob: <span id="pPhone">9808808637, 8267007838</span><br><span id="pEmail">mudihfashion@gmail.com</span><br><span id="pWebsite">www.mudih.in</span></div>
+</div>
+</section>
+</main>
+<script>
+const ids=['orderId','orderDate','payment','cod','ship','bill','product','description','size','color','material','qty','price','store','phone','email','website'];
+const $=id=>document.getElementById(id);
+const money=v=>'₹'+(Number(v||0)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+function dateFmt(v){if(!v)return '';const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});}
+function update(){
+ $('pDate').textContent=dateFmt($('orderDate').value);
+ $('pPayment').textContent=$('payment').value;
+ $('pCod').textContent=money($('cod').value);
+ $('pTotal').textContent=money($('cod').value);
+ $('pShip').textContent=$('ship').value;
+ $('pBill').textContent=$('bill').value;
+ $('pProduct').textContent=$('product').value;
+ $('pDesc').textContent=$('description').value;
+ $('pSize').textContent=$('size').value;
+ $('pColor').textContent=$('color').value;
+ $('pMaterial').textContent=$('material').value;
+ $('pQty').textContent=$('qty').value;
+ $('pPrice').textContent=money($('price').value);
+ $('pStore').textContent=$('store').value;
+ $('pPhone').textContent=$('phone').value;
+ $('pEmail').textContent=$('email').value;
+ $('pWebsite').textContent=$('website').value;
+ document.querySelector('[data-bind="orderId"]').textContent=$('orderId').value;
+}
+ids.forEach(id=>$(id).addEventListener('input',update));
+$('photo').addEventListener('change',e=>{const f=e.target.files[0];if(f){const reader=new FileReader();reader.onload=()=>{$('pPhoto').src=reader.result};reader.readAsDataURL(f)}});
+$('printBtn').addEventListener('click',()=>{update();window.print()});
+$('resetBtn').addEventListener('click',()=>location.reload());
+update();
+</script>
+</body>
+</html>'''
+path = Path("/mnt/data/MUDIH_Packaging_Slip_Generator.html")
+path.write_text(html, encoding="utf-8")
+print(f"Created: {path} ({path.stat().st_size} bytes)")
