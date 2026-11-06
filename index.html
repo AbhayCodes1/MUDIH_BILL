@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f2f3f5">
+  <title>MUDIH — Packaging Slip Generator</title>
+  <style>
+    :root { color-scheme: light; --ink:#202124; --muted:#6b7280; --line:#e5e7eb; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f2f3f5; color:var(--ink); font:15px/1.45 Arial,Helvetica,sans-serif; }
+    .top { background:#fff; border-bottom:1px solid var(--line); padding:18px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { font-size:25px; font-weight:800; letter-spacing:2px; }
+    .top small { color:var(--muted); }
+    .wrap { max-width:1240px; margin:24px auto; padding:0 18px; display:grid; grid-template-columns:minmax(300px,440px) minmax(0,1fr); gap:22px; align-items:start; }
+    .panel,.preview-wrap { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 3px 16px #1111; }
+    .panel { padding:20px; }
+    h2 { font-size:17px; margin:0 0 16px; }
+    .section { margin:20px 0 10px; color:#777; font-size:11px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .field { margin-bottom:11px; }
+    label { display:block; margin-bottom:5px; color:#4b5563; font-size:12px; font-weight:700; }
+    input,textarea { width:100%; border:1px solid #d8dce2; border-radius:8px; padding:10px 11px; color:#202124; background:#fff; font:14px Arial,sans-serif; }
+    input:focus,textarea:focus { outline:2px solid #999; outline-offset:1px; }
+    textarea { min-height:72px; resize:vertical; }
+    .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:16px; }
+    button { border:0; border-radius:8px; padding:11px 15px; font-size:13px; font-weight:700; cursor:pointer; }
+    .primary { color:white; background:#202124; }
+    .secondary { color:#222; background:#eceef1; }
+    .hint { margin-top:8px; color:#858585; font-size:11px; }
+    .preview-wrap { position:sticky; top:14px; padding:18px; }
+    .preview-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .preview-head strong { font-size:14px; }
+    .preview-head span { color:#777; font-size:11px; }
+    .paper { width:100%; max-width:800px; min-height:900px; margin:auto; padding:42px 48px; border:1px solid #e6e6e6; background:#fff; color:#222; }
+    .paper-head { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #222; padding-bottom:15px; }
+    .paper-brand { font-size:31px; font-weight:800; letter-spacing:2px; }
+    .slip-title { text-align:right; font-size:16px; font-weight:800; }
+    .slip-title small { display:block; margin-top:4px; color:#666; font-size:11px; font-weight:400; }
+    .meta { display:grid; grid-template-columns:1fr 1fr 1fr; margin-top:22px; border:1px solid #ddd; background:#f3f3f3; }
+    .meta>div { padding:12px; border-right:1px solid #ddd; font-size:12px; }
+    .meta>div:last-child { border:0; }
+    .meta b,.addr b,.items-title { display:block; margin-bottom:6px; font-size:10px; letter-spacing:.7px; }
+    .meta strong { font-size:16px; }
+    .addresses { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:24px 0; }
+    .addr { font-size:12px; line-height:1.6; white-space:pre-line; }
+    .addr b { margin-bottom:8px; font-size:11px; }
+    .items-title { margin:0 0 9px; }
+    .item { display:grid; grid-template-columns:82px 1fr 48px 80px; gap:12px; align-items:center; border:1px solid #ddd; padding:10px; font-size:12px; }
+    .item img { width:82px; height:82px; border:1px solid #eee; border-radius:5px; object-fit:cover; }
+    .item-name { margin-bottom:5px; font-size:13px; font-weight:700; }
+    .sub { color:#666; line-height:1.5; }
+    .total { display:flex; justify-content:space-between; margin-top:16px; padding-top:13px; border-top:1px solid #333; font-size:13px; font-weight:700; }
+    .thanks { margin-top:56px; padding-top:18px; border-top:1px solid #bbb; text-align:center; font-size:14px; font-weight:700; }
+    .footer { margin-top:13px; color:#666; text-align:center; font-size:10px; line-height:1.6; white-space:pre-line; }
+    @media(max-width:850px) { .wrap { grid-template-columns:1fr; } .preview-wrap { position:static; } .paper { min-height:auto; padding:25px 20px; } .top { padding:15px; } }
+    @media(max-width:520px) { .meta { grid-template-columns:1fr; } .meta>div { border-right:0; border-bottom:1px solid #ddd; } .addresses { gap:12px; } .item { grid-template-columns:60px 1fr; gap:8px; } .item img { width:60px; height:60px; } .item > div:nth-last-child(-n+2) { grid-row:2; } }
+    @media print { body { background:#fff; } .top,.panel,.preview-head { display:none!important; } .wrap { display:block; margin:0; padding:0; } .preview-wrap { position:static; padding:0; border:0; box-shadow:none; } .paper { width:100%; max-width:none; min-height:0; margin:0; padding:12mm 14mm; border:0; } @page { size:A4; margin:0; } }
+  </style>
+</head>
+<body>
+  <header class="top"><div class="brand">MUDIH</div><small>Packaging Slip Generator · Create &amp; print order slips</small></header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>Enter order details</h2>
+      <div class="section">Order details</div>
+      <div class="grid2">
+        <div class="field"><label for="orderId">Order ID</label><input id="orderId" value="#8081430"></div>
+        <div class="field"><label for="orderDate">Order date</label><input id="orderDate" type="date"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="payment">Payment method</label><input id="payment" value="Cash on Delivery (COD)"></div>
+        <div class="field"><label for="cod">Collectable amount (₹)</label><input id="cod" type="number" min="0" step="0.01" value="1199"></div>
+      </div>
+      <div class="section">Customer addresses</div>
+      <div class="field"><label for="ship">Ship to</label><textarea id="ship">Customer name
+Street address
+City, State, PIN
+India</textarea></div>
+      <div class="field"><label for="bill">Bill to</label><textarea id="bill">Customer name
+Street address
+City, State, PIN
+India</textarea></div>
+      <div class="section">Product details</div>
+      <div class="field"><label for="photo">Product photo</label><input id="photo" type="file" accept="image/*"><div class="hint">Choose a product image from your device.</div></div>
+      <div class="field"><label for="product">Product name</label><input id="product" value="Mudih Light Beige Korean Bootcut Pants for Men"></div>
+      <div class="field"><label for="description">Product description</label><input id="description" value="Premium Japanese Fabric"></div>
+      <div class="grid2">
+        <div class="field"><label for="size">Size</label><input id="size" value="30"></div>
+        <div class="field"><label for="color">Colour</label><input id="color" value="Light Beige"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="material">Material</label><input id="material" value="Polyester"></div>
+        <div class="field"><label for="qty">Quantity</label><input id="qty" type="number" min="1" value="1"></div>
+      </div>
+      <div class="field"><label for="price">Item price (₹)</label><input id="price" type="number" min="0" step="0.01" value="1199"></div>
+      <div class="section">Store details</div>
+      <div class="field"><label for="store">Address / footer</label><textarea id="store">Store address
+City, State, India
+PIN code</textarea></div>
+      <div class="grid2">
+        <div class="field"><label for="phone">Mobile numbers</label><input id="phone" value=""></div>
+        <div class="field"><label for="email">Email</label><input id="email" value=""></div>
+      </div>
+      <div class="field"><label for="website">Website</label><input id="website" value=""></div>
+      <div class="actions"><button class="primary" id="printBtn" type="button">Generate / Print PDF</button><button class="secondary" id="resetBtn" type="button">Reset sample</button></div>
+      <div class="hint">Choose “Save as PDF” in the print dialog to download a PDF.</div>
+    </section>
+    <section class="preview-wrap">
+      <div class="preview-head"><strong>Live packaging slip preview</strong><span>A4 · Print-ready</span></div>
+      <div class="paper">
+        <div class="paper-head"><div class="paper-brand">MUDIH</div><div class="slip-title">PACKING SLIP<small>Order <span id="pOrderId"></span></small></div></div>
+        <div class="meta"><div><b>ORDER DATE</b><span id="pDate"></span></div><div><b>PAYMENT METHOD</b><span id="pPayment"></span></div><div><b>COLLECTABLE AMOUNT</b><strong id="pCod"></strong></div></div>
+        <div class="addresses"><div class="addr"><b>SHIP TO</b><span id="pShip"></span></div><div class="addr"><b>BILL TO</b><span id="pBill"></span></div></div>
+        <div class="items-title">ITEMS</div>
+        <div class="item"><img id="pPhoto" alt="Product image"><div><div class="item-name" id="pProduct"></div><div class="sub"><span id="pDesc"></span><br>Size: <span id="pSize"></span> &nbsp; Colour: <span id="pColor"></span><br>Material: <span id="pMaterial"></span></div></div><div><b>Qty</b><br><span id="pQty"></span></div><div><b>Price</b><br><span id="pPrice"></span></div></div>
+        <div class="total"><span>COD AMOUNT TO COLLECT</span><span id="pTotal"></span></div>
+        <div class="thanks">Thank you for shopping with us!</div>
+        <div class="footer"><b>MUDIH</b><br><span id="pStore"></span><br>Mob: <span id="pPhone"></span><br><span id="pEmail"></span><br><span id="pWebsite"></span></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const ids=['orderId','orderDate','payment','cod','ship','bill','product','description','size','color','material','qty','price','store','phone','email','website'];
+    const $=id=>document.getElementById(id);
+    const money=value=>'₹'+(Number(value||0)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    function update(){
+      const date=$('orderDate').value;
+      $('pDate').textContent=date?new Date(date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
+      $('pOrderId').textContent=$('orderId').value;
+      $('pPayment').textContent=$('payment').value;
+      $('pCod').textContent=money($('cod').value);
+      $('pTotal').textContent=money($('cod').value);
+      $('pShip').textContent=$('ship').value;
+      $('pBill').textContent=$('bill').value;
+      $('pProduct').textContent=$('product').value;
+      $('pDesc').textContent=$('description').value;
+      ['size','color','material','qty'].forEach(id=>{const target={size:'pSize',color:'pColor',material:'pMaterial',qty:'pQty'}[id];$(target).textContent=$(id).value;});
+      $('pPrice').textContent=money($('price').value);
+      $('pStore').textContent=$('store').value;
+      $('pPhone').textContent=$('phone').value;
+      $('pEmail').textContent=$('email').value;
+      $('pWebsite').textContent=$('website').value;
+    }
+    ids.forEach(id=>$(id).addEventListener('input',update));
+    $('photo').addEventListener('change',event=>{const file=event.target.files[0];if(file){const reader=new FileReader();reader.onload=()=>{$('pPhoto').src=reader.result;};reader.readAsDataURL(file);}});
+    $('printBtn').addEventListener('click',()=>{update();window.print();});
+    $('resetBtn').addEventListener('click',()=>location.reload());
+    $('orderDate').value=new Date().toISOString().slice(0,10);
+    update();
+  </script>
+</body>
+</html>
