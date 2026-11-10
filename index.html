@@ -45,16 +45,18 @@
     .addresses { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:24px 0; }
     .addr { font-size:12px; line-height:1.6; white-space:pre-line; }
     .addr b { margin-bottom:8px; font-size:11px; }
+    .customer-phone { margin-top:7px; white-space:normal; overflow-wrap:anywhere; }
+    .customer-phone b { display:inline; margin:0 4px 0 0; font-size:inherit; letter-spacing:normal; }
     .items-title { margin:0 0 9px; }
     .item { display:grid; grid-template-columns:82px 1fr 48px 80px; gap:12px; align-items:center; border:1px solid #ddd; padding:10px; font-size:12px; }
     .item img { width:82px; height:82px; border:1px solid #eee; border-radius:5px; object-fit:cover; }
     .item-name { margin-bottom:5px; font-size:13px; font-weight:700; }
     .sub { color:#666; line-height:1.5; }
-    .total { display:flex; justify-content:space-between; margin-top:16px; padding-top:13px; border-top:1px solid #333; font-size:13px; font-weight:700; }
+    .total { display:flex; justify-content:space-between; gap:12px; margin-top:16px; padding-top:13px; border-top:1px solid #333; font-size:13px; font-weight:700; }
     .thanks { margin-top:56px; padding-top:18px; border-top:1px solid #bbb; text-align:center; font-size:14px; font-weight:700; }
     .footer { margin-top:13px; color:#666; text-align:center; font-size:10px; line-height:1.6; white-space:pre-line; }
     @media(max-width:850px) { .wrap { grid-template-columns:1fr; } .preview-wrap { position:static; } .paper { min-height:auto; padding:25px 20px; } .top { padding:15px; } }
-    @media(max-width:520px) { .meta { grid-template-columns:1fr; } .meta>div { border-right:0; border-bottom:1px solid #ddd; } .addresses { gap:12px; } .item { grid-template-columns:60px 1fr; gap:8px; } .item img { width:60px; height:60px; } .item > div:nth-last-child(-n+2) { grid-row:2; } }
+    @media(max-width:520px) { .meta { grid-template-columns:1fr; } .meta>div { border-right:0; border-bottom:1px solid #ddd; } .meta>div:last-child { border-bottom:0; } .addresses { gap:12px; } .item { grid-template-columns:60px 1fr; gap:8px; } .item img { width:60px; height:60px; } .item>div:nth-of-type(2),.item>div:nth-of-type(3) { grid-row:2; } .paper-head { gap:12px; } .paper-brand { font-size:25px; } .total { font-size:11px; } }
     @media print { body { background:#fff; } .top,.panel,.preview-head { display:none!important; } .wrap { display:block; margin:0; padding:0; } .preview-wrap { position:static; padding:0; border:0; box-shadow:none; } .paper { width:100%; max-width:none; min-height:0; margin:0; padding:12mm 14mm; border:0; } @page { size:A4; margin:0; } }
   </style>
 </head>
@@ -72,15 +74,16 @@
         <div class="field"><label for="payment">Payment method</label><input id="payment" value="Cash on Delivery (COD)"></div>
         <div class="field"><label for="cod">Collectable amount (₹)</label><input id="cod" type="number" min="0" step="0.01" value="1199"></div>
       </div>
-      <div class="section">Customer addresses</div>
+      <div class="section">Customer details</div>
       <div class="field"><label for="ship">Ship to</label><textarea id="ship">Customer name
 Street address
 City, State, PIN
 India</textarea></div>
-      <div class="field"><label for="bill">Bill to</label><textarea id="bill">Customer name
+      <div class="field"><label for="bill">Billing address</label><textarea id="bill">Customer name
 Street address
 City, State, PIN
 India</textarea></div>
+      <div class="field"><label for="customerPhone">Customer Phone Number</label><input id="customerPhone" name="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" title="Enter a 10-digit Indian mobile number, optionally prefixed with +91." placeholder="e.g. 9876543210"></div>
       <div class="section">Product details</div>
       <div class="field"><label for="photo">Product photo</label><input id="photo" type="file" accept="image/*"><div class="hint">Choose a product image from your device.</div></div>
       <div class="field"><label for="product">Product name</label><input id="product" value="Mudih Light Beige Korean Bootcut Pants for Men"></div>
@@ -111,7 +114,7 @@ PIN code</textarea></div>
       <div class="paper">
         <div class="paper-head"><div class="paper-brand">MUDIH</div><div class="slip-title">PACKING SLIP<small>Order <span id="pOrderId"></span></small></div></div>
         <div class="meta"><div><b>ORDER DATE</b><span id="pDate"></span></div><div><b>PAYMENT METHOD</b><span id="pPayment"></span></div><div><b>COLLECTABLE AMOUNT</b><strong id="pCod"></strong></div></div>
-        <div class="addresses"><div class="addr"><b>SHIP TO</b><span id="pShip"></span></div><div class="addr"><b>BILL TO</b><span id="pBill"></span></div></div>
+        <div class="addresses"><div class="addr"><b>SHIP TO</b><span id="pShip"></span><div id="pCustomerPhoneSection" class="customer-phone" hidden><b>Customer Phone:</b><span id="pCustomerPhone"></span></div></div><div class="addr"><b>BILL TO</b><span id="pBill"></span></div></div>
         <div class="items-title">ITEMS</div>
         <div class="item"><img id="pPhoto" alt="Product image"><div><div class="item-name" id="pProduct"></div><div class="sub"><span id="pDesc"></span><br>Size: <span id="pSize"></span> &nbsp; Colour: <span id="pColor"></span><br>Material: <span id="pMaterial"></span></div></div><div><b>Qty</b><br><span id="pQty"></span></div><div><b>Price</b><br><span id="pPrice"></span></div></div>
         <div class="total"><span>COD AMOUNT TO COLLECT</span><span id="pTotal"></span></div>
@@ -121,7 +124,7 @@ PIN code</textarea></div>
     </section>
   </main>
   <script>
-    const ids=['orderId','orderDate','payment','cod','ship','bill','product','description','size','color','material','qty','price','store','phone','email','website'];
+    const ids=['orderId','orderDate','payment','cod','ship','bill','customerPhone','product','description','size','color','material','qty','price','store','phone','email','website'];
     const $=id=>document.getElementById(id);
     const money=value=>'₹'+(Number(value||0)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
     function update(){
@@ -133,6 +136,9 @@ PIN code</textarea></div>
       $('pTotal').textContent=money($('cod').value);
       $('pShip').textContent=$('ship').value;
       $('pBill').textContent=$('bill').value;
+      const customerPhone=$('customerPhone').value.trim();
+      $('pCustomerPhone').textContent=customerPhone;
+      $('pCustomerPhoneSection').hidden=!customerPhone;
       $('pProduct').textContent=$('product').value;
       $('pDesc').textContent=$('description').value;
       ['size','color','material','qty'].forEach(id=>{const target={size:'pSize',color:'pColor',material:'pMaterial',qty:'pQty'}[id];$(target).textContent=$(id).value;});
